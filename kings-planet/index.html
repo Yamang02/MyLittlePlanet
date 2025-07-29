@@ -58,7 +58,28 @@
         // 게임 파일들을 순차적으로 로드
         function loadGameScripts() {
             const scripts = [
-                'js/game.js',  // game.js를 먼저 로드
+                // 유틸리티
+                'js/utils/Constants.js',
+                'js/utils/Helpers.js',
+                
+                // 매니저들
+                'js/game/managers/GameStateManager.js',
+                'js/game/managers/SettingsManager.js',
+                'js/game/managers/RecordsManager.js',
+                
+                // 엔티티들
+                'js/game/entities/Player.js',
+                'js/game/entities/King.js',
+                'js/game/entities/SpeechBubble.js',
+                
+                // 시스템들
+                'js/game/systems/InputSystem.js',
+                'js/game/systems/PhysicsSystem.js',
+                
+                // 메인 게임 파일
+                'js/game.js',
+                
+                // Scene들
                 'js/scenes/BootScene.js',
                 'js/scenes/PreloadScene.js',
                 'js/scenes/MainMenuScene.js',

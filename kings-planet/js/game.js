@@ -1,95 +1,70 @@
 // 글로벌 게임 객체를 즉시 정의
 window.KingsPlanetGame = {
-  // 게임 상태
-  gameState: {
-    playerHealth: 3,
-    kingHealth: 100,
-    currentPhase: 1,
-    currentCombo: 0,
-    gameStartTime: null,
-    totalPlayTime: 0,
-    parryWindow: 300  // 패링 성공 윈도우 (ms)
+  // 매니저들 (새로운 구조)
+  managers: {
+    gameState: null,
+    settings: null,
+    records: null
   },
   
-  // 사용자 설정
-  settings: {
-    bgmVolume: 70,
-    sfxVolume: 80,
-    fullscreen: false
+  // 기존 호환성을 위한 래퍼
+  get gameState() {
+    return this.managers.gameState ? this.managers.gameState.getState() : null;
   },
   
-  // 게임 기록
-  records: {
-    bestTime: null,
-    maxCombo: 0,
-    totalPlays: 0,
-    victories: 0
+  get settings() {
+    return this.managers.settings ? this.managers.settings.getSettings() : {};
   },
   
-  // 유틸리티 함수들
+  get records() {
+    return this.managers.records ? this.managers.records.getRecords() : {};
+  },
+  
+  // 유틸리티 함수들 (기존 호환성 유지)
   utils: {
     // LocalStorage에 저장
     saveToStorage() {
-      localStorage.setItem('kingsPlanetGame', JSON.stringify({
-        settings: window.KingsPlanetGame.settings,
-        records: window.KingsPlanetGame.records
-      }));
+      if (window.KingsPlanetGame.managers.settings) {
+        window.KingsPlanetGame.managers.settings.saveSettings();
+      }
+      if (window.KingsPlanetGame.managers.records) {
+        window.KingsPlanetGame.managers.records.saveRecords();
+      }
     },
     
     // LocalStorage에서 로드
     loadFromStorage() {
-      const saved = localStorage.getItem('kingsPlanetGame');
-      if (saved) {
-        const data = JSON.parse(saved);
-        Object.assign(window.KingsPlanetGame.settings, data.settings || {});
-        Object.assign(window.KingsPlanetGame.records, data.records || {});
-      }
+      // 매니저들이 초기화된 후에 호출됨
     },
     
     // 게임 상태 초기화
     resetGameState() {
-      window.KingsPlanetGame.gameState = {
-        playerHealth: 3,
-        kingHealth: 100,
-        currentPhase: 1,
-        currentCombo: 0,
-        gameStartTime: Date.now(),
-        totalPlayTime: 0,
-        parryWindow: 300
-      };
+      if (window.KingsPlanetGame.managers.gameState) {
+        window.KingsPlanetGame.managers.gameState.reset();
+      }
     },
     
     // 게임 완료 처리
     completeGame(victory = true) {
-      const gameState = window.KingsPlanetGame.gameState;
-      const records = window.KingsPlanetGame.records;
-      
-      // 플레이 시간 계산
-      const playTime = Date.now() - gameState.gameStartTime;
-      gameState.totalPlayTime = Math.floor(playTime / 1000);
-      
-      // 기록 업데이트
-      records.totalPlays++;
-      if (victory) {
-        records.victories++;
+      if (window.KingsPlanetGame.managers.gameState) {
+        const gameState = window.KingsPlanetGame.managers.gameState.getState();
+        window.KingsPlanetGame.managers.gameState.completeGame(victory);
         
-        // 최고 시간 업데이트
-        if (!records.bestTime || gameState.totalPlayTime < records.bestTime) {
-          records.bestTime = gameState.totalPlayTime;
+        if (window.KingsPlanetGame.managers.records) {
+          window.KingsPlanetGame.managers.records.recordGameCompletion(
+            victory,
+            gameState.totalPlayTime,
+            gameState.currentCombo
+          );
         }
       }
-      
-      // 최대 콤보 업데이트
-      if (gameState.currentCombo > records.maxCombo) {
-        records.maxCombo = gameState.currentCombo;
-      }
-      
-      // 저장
-      this.saveToStorage();
     },
     
     // 시간을 분:초 형식으로 변환
     formatTime(seconds) {
+      if (window.GameHelpers) {
+        return GameHelpers.formatTime(seconds);
+      }
       const mins = Math.floor(seconds / 60);
       const secs = seconds % 60;
       return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -114,6 +89,17 @@ function startGame() {
     document.getElementById('error').innerHTML = `누락된 클래스들: ${missingClasses.join(', ')}`;
     document.getElementById('error').style.display = 'block';
     return;
+  }
+  
+  // 매니저들 초기화
+  if (typeof GameStateManager !== 'undefined') {
+    window.KingsPlanetGame.managers.gameState = new GameStateManager();
+  }
+  if (typeof SettingsManager !== 'undefined') {
+    window.KingsPlanetGame.managers.settings = new SettingsManager();
+  }
+  if (typeof RecordsManager !== 'undefined') {
+    window.KingsPlanetGame.managers.records = new RecordsManager();
   }
   
   // Phaser 게임 설정 (모든 클래스가 로드된 후에 정의)
