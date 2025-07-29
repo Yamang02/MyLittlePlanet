@@ -1,0 +1,84 @@
+# King's Planet Game - Requirements
+# 이 프로젝트는 순수 HTML/JavaScript + Phaser3로 구현되어 별도 라이브러리 설치가 필요하지 않습니다.
+
+# 브라우저에서 게임 실행 방법:
+
+# 방법 1: 로컬 HTTP 서버 (Python)
+# cd kings-planet
+# python -m http.server 8000
+# 브라우저에서 http://localhost:8000 접속
+
+# 방법 2: 로컬 HTTP 서버 (Node.js) - 선택사항
+# npm install -g http-server
+# cd kings-planet
+# http-server
+# 브라우저에서 표시된 주소 접속
+
+# 방법 3: Live Server (VS Code 확장) - 추천
+# VS Code에서 Live Server 확장 설치
+# index.html 우클릭 > "Open with Live Server"
+
+# ========================================
+# 개발 환경 요구사항
+# ========================================
+
+# 1. 웹 브라우저 (최신 버전)
+#    - Chrome 90+
+#    - Firefox 88+
+#    - Safari 14+
+#    - Edge 90+
+
+# 2. 텍스트 에디터/IDE
+#    - VS Code (추천)
+#    - Sublime Text
+#    - Atom
+#    - WebStorm
+
+# ========================================
+# 사용 중인 라이브러리 (CDN)
+# ========================================
+
+# Phaser3 v3.70.0
+# https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js
+
+# ========================================
+# 선택사항: 개발용 도구들
+# ========================================
+
+# Python (로컬 서버용)
+# python --version (3.6+)
+
+# Node.js (로컬 서버용, 선택사항)
+# node --version (14+)
+# npm --version (6+)
+
+# ========================================
+# 프로젝트 구조
+# ========================================
+
+# MyLittlePlanet/
+# ├── kings-planet/           # 게임 폴더
+# │   ├── index.html          # 메인 HTML
+# │   └── js/                 # JavaScript 파일들
+# │       ├── game.js         # 게임 설정
+# │       └── scenes/         # Phaser Scene들
+# ├── docs/                   # 설계 문서들
+# └── requirements.txt        # 이 파일
+
+# ========================================
+# 실행 방법
+# ========================================
+
+# 1. 터미널에서:
+#    cd C:\GIT\MyLittlePlanet\kings-planet
+#    python -m http.server 8000
+
+# 2. 브라우저에서:
+#    http://localhost:8000
+
+# 3. 게임 조작법:
+#    ← → : 이동
+#    SPACE : 회피
+#    Z : 패링
+#    ENTER : 게임 시작 (메뉴에서)
+#    ESC : 전체화면 토글
