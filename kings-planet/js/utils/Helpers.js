@@ -86,5 +86,5 @@ class GameHelpers {
   }
 }
 
-// 전역 변수로 노출
-window.GameHelpers = GameHelpers; 
+// ES6 모듈로 export
+export { GameHelpers }; 

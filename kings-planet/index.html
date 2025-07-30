@@ -43,7 +43,7 @@
     <!-- Phaser3 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
     
-    <script>
+    <script type="module">
         // Phaser 로딩 확인
         function checkPhaser() {
             if (typeof Phaser === 'undefined') {
@@ -55,84 +55,31 @@
             return true;
         }
         
-        // 게임 파일들을 순차적으로 로드
-        function loadGameScripts() {
-            const scripts = [
-                // 유틸리티
-                'js/utils/Constants.js',
-                'js/utils/Helpers.js',
+        // ES6 모듈 기반 게임 시작
+        async function startGame() {
+            try {
+                // 메인 게임 모듈 로드
+                const { KingsPlanetGame } = await import('./js/game.js');
                 
-                // 매니저들
-                'js/game/managers/GameStateManager.js',
-                'js/game/managers/SettingsManager.js',
-                'js/game/managers/RecordsManager.js',
+                // 로딩 화면 숨김
+                document.getElementById('loading').style.display = 'none';
+                console.log('게임이 성공적으로 시작되었습니다!');
                 
-                // 엔티티들
-                'js/game/entities/Player.js',
-                'js/game/entities/King.js',
-                'js/game/entities/SpeechBubble.js',
+                // 게임 초기화
+                KingsPlanetGame.init();
                 
-                // 시스템들
-                'js/game/systems/InputSystem.js',
-                'js/game/systems/PhysicsSystem.js',
-                
-                // 메인 게임 파일
-                'js/game.js',
-                
-                // Scene들
-                'js/scenes/BootScene.js',
-                'js/scenes/PreloadScene.js',
-                'js/scenes/MainMenuScene.js',
-                'js/scenes/GameScene.js',
-                'js/scenes/VictoryScene.js',
-                'js/scenes/GameOverScene.js',
-                'js/scenes/KingEventCutscene.js'
-            ];
-            
-            let loadedCount = 0;
-            
-            function loadNext(index) {
-                if (index >= scripts.length) {
-                    // 모든 파일이 로드되었으므로 게임 시작
-                    document.getElementById('loading').style.display = 'none';
-                    console.log('모든 게임 파일이 로드되었습니다.');
-                    
-                    // 게임 시작 함수 호출
-                    if (typeof startGame === 'function') {
-                        startGame();
-                    } else {
-                        // game.js에서 게임 시작 로직 실행
-                        if (window.KingsPlanetGame && window.KingsPlanetGame.phaserGame) {
-                            console.log('게임이 이미 시작되었습니다.');
-                        } else {
-                            console.error('게임 시작 함수를 찾을 수 없습니다.');
-                        }
-                    }
-                    return;
-                }
-                
-                const script = document.createElement('script');
-                script.src = scripts[index];
-                script.onload = () => {
-                    loadedCount++;
-                    console.log(`로드됨: ${scripts[index]}`);
-                    loadNext(index + 1);
-                };
-                script.onerror = () => {
-                    document.getElementById('error').innerHTML = `파일 로딩 실패: ${scripts[index]}`;
-                    document.getElementById('error').style.display = 'block';
-                    document.getElementById('loading').style.display = 'none';
-                };
-                document.head.appendChild(script);
+            } catch (error) {
+                console.error('게임 로드 실패:', error);
+                document.getElementById('error').innerHTML = `게임 로드 실패: ${error.message}`;
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
             }
-            
-            loadNext(0);
         }
         
         // 페이지 로드 시 실행
         window.addEventListener('load', () => {
             if (checkPhaser()) {
-                loadGameScripts();
+                startGame();
             }
         });
     </script>

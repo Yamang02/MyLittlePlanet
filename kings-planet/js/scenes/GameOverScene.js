@@ -1,4 +1,4 @@
-class GameOverScene extends Phaser.Scene {
+export default class GameOverScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameOverScene' });
   }
@@ -76,7 +76,7 @@ class GameOverScene extends Phaser.Scene {
     
     // 2초 후 왕의 메시지
     this.time.delayedCall(2000, () => {
-      this.add.text(width/2, height * 0.45, '이제 영원히 날 섬겨라', {
+      const kingMessage = this.add.text(width/2, height * 0.45, '이제 영원히 날 섬겨라', {
         fontSize: '24px',
         fill: '#8e44ad',
         fontFamily: 'Arial',
@@ -84,7 +84,7 @@ class GameOverScene extends Phaser.Scene {
       }).setOrigin(0.5).setAlpha(0);
       
       this.tweens.add({
-        targets: this.children.getByName || this.children.list[this.children.list.length - 1],
+        targets: kingMessage,
         alpha: 1,
         duration: 1500
       });
@@ -144,15 +144,11 @@ class GameOverScene extends Phaser.Scene {
   }
   
   continue() {
-    console.log('Continue - 이벤트 컷신으로 이동');
     this.scene.start('KingEventCutscene');
   }
   
   goToMenu() {
-    console.log('메인 메뉴로 이동');
     this.scene.start('MainMenuScene');
   }
 }
 
-// 전역 스코프에서 접근 가능하도록 설정
-window.GameOverScene = GameOverScene;

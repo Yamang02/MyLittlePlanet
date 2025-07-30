@@ -1,10 +1,11 @@
 import { GAME_CONSTANTS, COLORS, PHASES } from '../../utils/Constants.js';
 
 export class King {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, dialogueManager) {
     this.scene = scene;
     this.x = x;
     this.y = y;
+    this.dialogueManager = dialogueManager;
     
     // 스프라이트 생성
     this.sprite = scene.add.sprite(x, y, 'king');
@@ -87,26 +88,49 @@ export class King {
   
   // 페이즈별 공격 패턴 가져오기
   getAttackPattern() {
-    const patterns = {
-      [PHASES.PHASE_1]: [
+    // DialogueManager를 사용하여 대화 데이터 가져오기
+    if (this.dialogueManager && this.dialogueManager.isDataLoaded()) {
+      const dialogue = this.dialogueManager.getDialogue('king', this.currentPhase, this.getDialogueType());
+      if (dialogue) {
+        return dialogue;
+      }
+    }
+    
+    // 폴백: 기본 대화 패턴 (DialogueManager 로드 실패 시)
+    const fallbackPatterns = {
+      'phase1': [
         { text: '앉아라!', type: 'command' },
         { text: '일어나라!', type: 'command' },
         { text: '이리오너라!', type: 'command' }
       ],
-      [PHASES.PHASE_2]: [
+      'phase2': [
         { text: '엎드려라!', type: 'rage' },
         { text: '네가 감히!', type: 'rage' },
         { text: '명령이다!', type: 'rage' }
       ],
-      [PHASES.PHASE_3]: [
+      'phase3': [
         { text: '가까이...오거라', type: 'plea' },
         { text: '부탁하마...', type: 'plea' },
         { text: '떠나지..말거라', type: 'plea' }
       ]
     };
     
-    const currentPatterns = patterns[this.currentPhase] || patterns[PHASES.PHASE_1];
+    const currentPatterns = fallbackPatterns[this.currentPhase] || fallbackPatterns['phase1'];
     return currentPatterns[Math.floor(Math.random() * currentPatterns.length)];
+  }
+
+  // 현재 페이즈에 따른 대화 타입 결정
+  getDialogueType() {
+    switch (this.currentPhase) {
+      case PHASES.PHASE_1:
+        return 'command';
+      case PHASES.PHASE_2:
+        return 'rage';
+      case PHASES.PHASE_3:
+        return 'plea';
+      default:
+        return 'command';
+    }
   }
   
   // 페이즈 변경

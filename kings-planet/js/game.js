@@ -1,10 +1,16 @@
-// 글로벌 게임 객체를 즉시 정의
-window.KingsPlanetGame = {
-  // 매니저들 (새로운 구조)
+import { GameStateManager } from './game/managers/GameStateManager.js';
+import { SettingsManager } from './game/managers/SettingsManager.js';
+import { RecordsManager } from './game/managers/RecordsManager.js';
+import { DialogueManager } from './managers/DialogueManager.js';
+
+// 게임 객체 정의
+export const KingsPlanetGame = {
+  // 매니저들
   managers: {
     gameState: null,
     settings: null,
-    records: null
+    records: null,
+    dialogue: null
   },
   
   // 기존 호환성을 위한 래퍼
@@ -20,15 +26,15 @@ window.KingsPlanetGame = {
     return this.managers.records ? this.managers.records.getRecords() : {};
   },
   
-  // 유틸리티 함수들 (기존 호환성 유지)
+  // 유틸리티 함수들
   utils: {
     // LocalStorage에 저장
     saveToStorage() {
-      if (window.KingsPlanetGame.managers.settings) {
-        window.KingsPlanetGame.managers.settings.saveSettings();
+      if (KingsPlanetGame.managers.settings) {
+        KingsPlanetGame.managers.settings.saveSettings();
       }
-      if (window.KingsPlanetGame.managers.records) {
-        window.KingsPlanetGame.managers.records.saveRecords();
+      if (KingsPlanetGame.managers.records) {
+        KingsPlanetGame.managers.records.saveRecords();
       }
     },
     
@@ -39,19 +45,19 @@ window.KingsPlanetGame = {
     
     // 게임 상태 초기화
     resetGameState() {
-      if (window.KingsPlanetGame.managers.gameState) {
-        window.KingsPlanetGame.managers.gameState.reset();
+      if (KingsPlanetGame.managers.gameState) {
+        KingsPlanetGame.managers.gameState.reset();
       }
     },
     
     // 게임 완료 처리
     completeGame(victory = true) {
-      if (window.KingsPlanetGame.managers.gameState) {
-        const gameState = window.KingsPlanetGame.managers.gameState.getState();
-        window.KingsPlanetGame.managers.gameState.completeGame(victory);
+      if (KingsPlanetGame.managers.gameState) {
+        const gameState = KingsPlanetGame.managers.gameState.getState();
+        KingsPlanetGame.managers.gameState.completeGame(victory);
         
-        if (window.KingsPlanetGame.managers.records) {
-          window.KingsPlanetGame.managers.records.recordGameCompletion(
+        if (KingsPlanetGame.managers.records) {
+          KingsPlanetGame.managers.records.recordGameCompletion(
             victory,
             gameState.totalPlayTime,
             gameState.currentCombo
@@ -62,79 +68,101 @@ window.KingsPlanetGame = {
     
     // 시간을 분:초 형식으로 변환
     formatTime(seconds) {
-      if (window.GameHelpers) {
-        return GameHelpers.formatTime(seconds);
-      }
       const mins = Math.floor(seconds / 60);
       const secs = seconds % 60;
       return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
+  },
+  
+  // 게임 초기화 메서드
+  init() {
+    // 매니저들 초기화
+    this.managers.gameState = new GameStateManager();
+    this.managers.settings = new SettingsManager();
+    this.managers.records = new RecordsManager();
+    this.managers.dialogue = new DialogueManager();
+    
+    // 대화 데이터 로드
+    this.managers.dialogue.loadDialogues();
+    
+    // 저장된 데이터 로드
+    this.utils.loadFromStorage();
+    
+    // Phaser 게임 시작
+    this.startPhaserGame();
+  },
+  
+  // Phaser 게임 시작
+  async startPhaserGame() {
+    try {
+      // Scene 클래스들 동적 import
+      const [
+        { default: BootScene },
+        { default: PreloadScene },
+        { default: MainMenuScene },
+        { default: GameScene },
+        { default: VictoryScene },
+        { default: GameOverScene },
+        { default: KingEventCutscene }
+      ] = await Promise.all([
+        import('./scenes/BootScene.js'),
+        import('./scenes/PreloadScene.js'),
+        import('./scenes/MainMenuScene.js'),
+        import('./scenes/GameScene.js'),
+        import('./scenes/VictoryScene.js'),
+        import('./scenes/GameOverScene.js'),
+        import('./scenes/KingEventCutscene.js')
+      ]);
+      
+      // 씬에 상태 관리자 주입
+      const scenesWithDependencies = [
+        new BootScene({ gameStateManager: this.managers.gameState }),
+        new PreloadScene(),
+        new MainMenuScene({ 
+          gameStateManager: this.managers.gameState,
+          recordsManager: this.managers.records,
+          settingsManager: this.managers.settings
+        }),
+        new GameScene({ 
+          gameStateManager: this.managers.gameState,
+          dialogueManager: this.managers.dialogue
+        }),
+        new VictoryScene({ 
+          gameStateManager: this.managers.gameState,
+          recordsManager: this.managers.records
+        }),
+        new GameOverScene(),
+        new KingEventCutscene({ gameStateManager: this.managers.gameState })
+      ];
+      
+      // Phaser 게임 설정
+      const gameConfig = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        parent: 'game-container',
+        backgroundColor: '#2c3e50',
+        physics: {
+          default: 'arcade',
+          arcade: {
+            gravity: { y: 0 },
+            debug: false
+          }
+        },
+        scene: scenesWithDependencies
+      };
+      
+      // Phaser 게임 인스턴스 생성
+      this.phaserGame = new Phaser.Game(gameConfig);
+      
+      // 게임 인스턴스가 제대로 생성되었는지 확인
+      if (!this.phaserGame || !this.phaserGame.scene) {
+        throw new Error('Phaser 게임 인스턴스 생성 실패');
+      }
+      
+    } catch (error) {
+      console.error('Phaser 게임 시작 실패:', error);
+      throw error;
+    }
   }
 };
-
-// 게임 시작 함수
-function startGame() {
-  // 모든 필요한 클래스들이 정의되었는지 확인
-  const requiredClasses = [
-    'BootScene', 'PreloadScene', 'MainMenuScene', 
-    'GameScene', 'VictoryScene', 'GameOverScene', 'KingEventCutscene'
-  ];
-  
-  const missingClasses = requiredClasses.filter(className => {
-    return typeof window[className] === 'undefined';
-  });
-  
-  if (missingClasses.length > 0) {
-    console.error('누락된 클래스들:', missingClasses);
-    document.getElementById('error').innerHTML = `누락된 클래스들: ${missingClasses.join(', ')}`;
-    document.getElementById('error').style.display = 'block';
-    return;
-  }
-  
-  // 매니저들 초기화
-  if (typeof GameStateManager !== 'undefined') {
-    window.KingsPlanetGame.managers.gameState = new GameStateManager();
-  }
-  if (typeof SettingsManager !== 'undefined') {
-    window.KingsPlanetGame.managers.settings = new SettingsManager();
-  }
-  if (typeof RecordsManager !== 'undefined') {
-    window.KingsPlanetGame.managers.records = new RecordsManager();
-  }
-  
-  // Phaser 게임 설정 (모든 클래스가 로드된 후에 정의)
-  const gameConfig = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    parent: 'game-container',
-    backgroundColor: '#2c3e50',
-    physics: {
-      default: 'arcade',
-      arcade: {
-        gravity: { y: 0 },
-        debug: false
-      }
-    },
-    scene: [
-      BootScene,
-      PreloadScene, 
-      MainMenuScene,
-      GameScene,
-      VictoryScene,
-      GameOverScene,
-      KingEventCutscene
-    ]
-  };
-  
-  // 저장된 데이터 로드
-  window.KingsPlanetGame.utils.loadFromStorage();
-  
-  // Phaser 게임 인스턴스 생성
-  window.KingsPlanetGame.phaserGame = new Phaser.Game(gameConfig);
-  
-  console.log('게임이 성공적으로 시작되었습니다!');
-}
-
-// 전역 함수로 노출
-window.startGame = startGame;

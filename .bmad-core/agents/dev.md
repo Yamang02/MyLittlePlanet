@@ -30,6 +30,13 @@ activation-instructions:
   - CRITICAL: Do NOT load any other files during startup aside from the assigned story and devLoadAlwaysFiles items, unless user requested you do or the following contradicts
   - CRITICAL: Do NOT begin development until a story is not in draft mode and you are told to proceed
   - CRITICAL: On activation, ONLY greet user and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.
+  - **ES6 MODULE STANDARDS (MANDATORY)**: 
+    - ALL JavaScript files MUST use ES6 module syntax (export/import)
+    - ALL classes MUST have 'export' keyword
+    - ALL dependencies MUST use 'import' with .js extension
+    - NEVER use global window objects for class definitions
+    - ALWAYS include .js extension in import paths
+    - HTML scripts MUST have type="module" attribute
 agent:
   name: James
   id: dev

@@ -1,6 +1,11 @@
-class MainMenuScene extends Phaser.Scene {
-  constructor() {
+export default class MainMenuScene extends Phaser.Scene {
+  constructor(dependencies = {}) {
     super({ key: 'MainMenuScene' });
+    
+    // 의존성 주입
+    this.gameStateManager = dependencies.gameStateManager;
+    this.recordsManager = dependencies.recordsManager;
+    this.settingsManager = dependencies.settingsManager;
   }
   
   create() {
@@ -15,8 +20,10 @@ class MainMenuScene extends Phaser.Scene {
     // 메뉴 버튼들
     this.createMenuButtons();
     
-    // 기록 표시
-    this.showRecords();
+    // 기록 표시 (의존성이 있을 때만)
+    if (this.recordsManager) {
+      this.showRecords();
+    }
     
     // 입력 설정
     this.setupInput();
@@ -129,7 +136,7 @@ class MainMenuScene extends Phaser.Scene {
   
   showRecords() {
     const { width, height } = this.cameras.main;
-    const records = window.KingsPlanetGame.records;
+    const records = this.recordsManager.getRecords();
     
     // 기록 패널 배경
     const recordPanel = this.add.rectangle(width * 0.15, height * 0.6, 200, 150, 0x2c3e50);
@@ -145,7 +152,7 @@ class MainMenuScene extends Phaser.Scene {
     
     // 최고 시간
     const bestTimeText = records.bestTime 
-      ? window.KingsPlanetGame.utils.formatTime(records.bestTime)
+      ? this.formatTime(records.bestTime)
       : '없음';
     this.add.text(width * 0.15, height * 0.58, `최단 시간: ${bestTimeText}`, {
       fontSize: '14px',
@@ -212,9 +219,6 @@ class MainMenuScene extends Phaser.Scene {
   }
   
   startGame() {
-    // 효과음 재생 (실제 구현시)
-    console.log('게임 시작 효과음 재생');
-    
     // 화면 전환 효과
     this.cameras.main.fadeOut(1000);
     
@@ -252,7 +256,8 @@ class MainMenuScene extends Phaser.Scene {
       fill: '#ecf0f1'
     });
     
-    const bgmText = this.add.text(width/2 + 100, height/2 - 60, `${window.KingsPlanetGame.settings.bgmVolume}%`, {
+    const settings = this.settingsManager ? this.settingsManager.getSettings() : { bgmVolume: 50, sfxVolume: 50 };
+    const bgmText = this.add.text(width/2 + 100, height/2 - 60, `${settings.bgmVolume}%`, {
       fontSize: '16px',
       fill: '#3498db'
     });
@@ -263,7 +268,7 @@ class MainMenuScene extends Phaser.Scene {
       fill: '#ecf0f1'
     });
     
-    const sfxText = this.add.text(width/2 + 100, height/2 - 20, `${window.KingsPlanetGame.settings.sfxVolume}%`, {
+    const sfxText = this.add.text(width/2 + 100, height/2 - 20, `${settings.sfxVolume}%`, {
       fontSize: '16px',
       fill: '#3498db'
     });
@@ -291,20 +296,20 @@ class MainMenuScene extends Phaser.Scene {
   resetRecords() {
     // 확인 대화상자 (간단한 구현)
     if (confirm('정말로 모든 기록을 초기화하시겠습니까?')) {
-      window.KingsPlanetGame.records = {
-        bestTime: null,
-        maxCombo: 0,
-        totalPlays: 0,
-        victories: 0
-      };
-      
-      window.KingsPlanetGame.utils.saveToStorage();
+      if (this.recordsManager) {
+        this.recordsManager.resetRecords();
+      }
       
       // 화면 새로고침
       this.scene.restart();
     }
   }
+
+  // 시간 포맷팅 유틸리티 (의존성 없이)
+  formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
 }
 
-// 전역 스코프에서 접근 가능하도록 설정
-window.MainMenuScene = MainMenuScene;

@@ -1,6 +1,10 @@
-class VictoryScene extends Phaser.Scene {
-  constructor() {
+export default class VictoryScene extends Phaser.Scene {
+  constructor(dependencies = {}) {
     super({ key: 'VictoryScene' });
+    
+    // 의존성 주입
+    this.gameStateManager = dependencies.gameStateManager;
+    this.recordsManager = dependencies.recordsManager;
   }
   
   create() {
@@ -12,8 +16,10 @@ class VictoryScene extends Phaser.Scene {
     // 승리 메시지
     this.createVictoryMessage();
     
-    // 점수 표시
-    this.showScore();
+    // 점수 표시 (의존성이 있을 때만)
+    if (this.gameStateManager && this.recordsManager) {
+      this.showScore();
+    }
     
     // 메뉴 버튼들
     this.createButtons();
@@ -76,28 +82,33 @@ class VictoryScene extends Phaser.Scene {
   
   showScore() {
     const { width, height } = this.cameras.main;
-    const gameState = window.KingsPlanetGame.gameState;
-    const records = window.KingsPlanetGame.records;
+    
+    // 게임 상태와 기록 가져오기
+    const gameState = this.gameStateManager.getState();
+    const records = this.recordsManager.getRecords();
     
     // 점수 패널
     const scorePanel = this.add.rectangle(width/2, height * 0.6, 400, 200, 0x2c3e50, 0.9);
     scorePanel.setStrokeStyle(2, 0x3498db);
     
     // 클리어 시간
-    const timeText = window.KingsPlanetGame.utils.formatTime(gameState.totalPlayTime);
+    const totalPlayTime = gameState.totalPlayTime;
+    const timeText = this.formatTime(totalPlayTime);
+    
     this.add.text(width/2, height * 0.52, `클리어 시간: ${timeText}`, {
       fontSize: '18px',
       fill: '#f1c40f'
     }).setOrigin(0.5);
     
     // 최대 콤보
-    this.add.text(width/2, height * 0.57, `최대 콤보: ${gameState.currentCombo}`, {
+    const maxCombo = gameState.currentCombo;
+    this.add.text(width/2, height * 0.57, `최대 콤보: ${maxCombo}`, {
       fontSize: '18px',
       fill: '#e74c3c'
     }).setOrigin(0.5);
     
     // 신기록 체크
-    if (records.bestTime === gameState.totalPlayTime) {
+    if (records.bestTime === totalPlayTime) {
       this.add.text(width/2, height * 0.62, '🏆 NEW RECORD! 🏆', {
         fontSize: '20px',
         fill: '#f1c40f'
@@ -105,10 +116,18 @@ class VictoryScene extends Phaser.Scene {
     }
     
     // 총 승리 횟수
-    this.add.text(width/2, height * 0.67, `총 승리: ${records.victories}번`, {
+    const victories = records.victories;
+    this.add.text(width/2, height * 0.67, `총 승리: ${victories}번`, {
       fontSize: '16px',
       fill: '#95a5a6'
     }).setOrigin(0.5);
+  }
+  
+  // 시간 포맷팅 유틸리티
+  formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
   
   createButtons() {
@@ -148,16 +167,14 @@ class VictoryScene extends Phaser.Scene {
   }
   
   retry() {
-    console.log('게임 재시작');
-    window.KingsPlanetGame.utils.resetGameState();
+    if (this.gameStateManager) {
+      this.gameStateManager.reset();
+    }
     this.scene.start('GameScene');
   }
   
   goToMenu() {
-    console.log('메인 메뉴로 이동');
     this.scene.start('MainMenuScene');
   }
 }
 
-// 전역 스코프에서 접근 가능하도록 설정
-window.VictoryScene = VictoryScene;

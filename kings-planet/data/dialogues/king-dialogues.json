@@ -1,0 +1,70 @@
+{
+  "king": {
+    "phase1": {
+      "command": [
+        {
+          "id": "sit_down",
+          "text": "앉아라!",
+          "type": "command",
+          "weight": 1
+        },
+        {
+          "id": "stand_up", 
+          "text": "일어나라!",
+          "type": "command",
+          "weight": 1
+        },
+        {
+          "id": "come_here",
+          "text": "이리오너라!",
+          "type": "command",
+          "weight": 1
+        }
+      ]
+    },
+    "phase2": {
+      "rage": [
+        {
+          "id": "kneel",
+          "text": "엎드려라!",
+          "type": "rage",
+          "weight": 1
+        },
+        {
+          "id": "how_dare",
+          "text": "네가 감히!",
+          "type": "rage",
+          "weight": 1
+        },
+        {
+          "id": "command_order",
+          "text": "명령이다!",
+          "type": "rage",
+          "weight": 1
+        }
+      ]
+    },
+    "phase3": {
+      "plea": [
+        {
+          "id": "come_closer",
+          "text": "가까이...오거라",
+          "type": "plea",
+          "weight": 1
+        },
+        {
+          "id": "please",
+          "text": "부탁하마...",
+          "type": "plea",
+          "weight": 1
+        },
+        {
+          "id": "dont_leave",
+          "text": "떠나지..말거라",
+          "type": "plea",
+          "weight": 1
+        }
+      ]
+    }
+  }
+} 

@@ -1,6 +1,9 @@
-class KingEventCutscene extends Phaser.Scene {
-  constructor() {
+export default class KingEventCutscene extends Phaser.Scene {
+  constructor(dependencies = {}) {
     super({ key: 'KingEventCutscene' });
+    
+    // 의존성 주입
+    this.gameStateManager = dependencies.gameStateManager;
   }
   
   create() {
@@ -155,8 +158,7 @@ class KingEventCutscene extends Phaser.Scene {
       ease: 'Power2.easeOut'
     });
     
-    // 효과음 재생 (콘솔 로그)
-    console.log('효과음: 파워업!');
+
     
     // 1초 후 게임으로 복귀
     this.time.delayedCall(1500, () => {
@@ -189,21 +191,10 @@ class KingEventCutscene extends Phaser.Scene {
   }
   
   resetBattleState() {
-    const gameState = window.KingsPlanetGame.gameState;
-    
-    // 체력 및 상태 초기화 (버프 없음)
-    gameState.playerHealth = 3;
-    gameState.kingHealth = 100;
-    gameState.currentPhase = 1;
-    gameState.currentCombo = 0;
-    gameState.gameStartTime = Date.now(); // 시간 재설정
-    
-    // 게임 밸런스에 영향을 주는 요소는 모두 기본값으로
-    gameState.parryWindow = 300;
-    
-    console.log('게임 상태 초기화 완료');
+    // 게임 상태 매니저를 통해 초기화
+    if (this.gameStateManager) {
+      this.gameStateManager.reset();
+    }
   }
 }
 
-// 전역 스코프에서 접근 가능하도록 설정
-window.KingEventCutscene = KingEventCutscene;

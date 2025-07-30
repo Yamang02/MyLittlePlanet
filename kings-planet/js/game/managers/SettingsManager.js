@@ -1,7 +1,6 @@
-// 전역 변수로 접근
-const GameHelpers = window.GameHelpers;
+import { GameHelpers } from '../../utils/Helpers.js';
 
-class SettingsManager {
+export class SettingsManager {
   constructor() {
     this.settings = {
       bgmVolume: 70,
@@ -101,5 +100,4 @@ class SettingsManager {
   }
 }
 
-// 전역 변수로 노출
-window.SettingsManager = SettingsManager; 
+// ES6 모듈 export만 사용 (전역변수 제거) 

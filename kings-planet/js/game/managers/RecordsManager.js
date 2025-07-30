@@ -1,7 +1,6 @@
-// 전역 변수로 접근
-const GameHelpers = window.GameHelpers;
+import { GameHelpers } from '../../utils/Helpers.js';
 
-class RecordsManager {
+export class RecordsManager {
   constructor() {
     this.records = {
       bestTime: null,
@@ -125,5 +124,4 @@ class RecordsManager {
   }
 }
 
-// 전역 변수로 노출
-window.RecordsManager = RecordsManager; 
+// ES6 모듈 export만 사용 (전역변수 제거) 

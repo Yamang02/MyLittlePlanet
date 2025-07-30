@@ -1,11 +1,61 @@
-// 전역 변수로 접근
-const GAME_CONSTANTS = window.GAME_CONSTANTS;
-const GAME_STATES = window.GAME_STATES;
-const PHASES = window.PHASES;
-const GameHelpers = window.GameHelpers;
+// 게임 상수 정의 (전역변수 대신 모듈 내부에서 정의)
+const GAME_CONSTANTS = {
+  PLAYER: {
+    HEALTH: 3
+  },
+  KING: {
+    MAX_HEALTH: 100,
+    PHASE_1_THRESHOLD: 60,
+    PHASE_2_THRESHOLD: 20
+  },
+  ATTACK: {
+    PHASE_1_COOLDOWN: { MIN: 2000, MAX: 3000 },
+    PHASE_2_COOLDOWN: { MIN: 1000, MAX: 1500 },
+    PHASE_3_COOLDOWN: { MIN: 3000, MAX: 4000 }
+  }
+};
 
-class GameStateManager {
+const GAME_STATES = {
+  PLAYING: 'playing',
+  VICTORY: 'victory',
+  GAME_OVER: 'game_over'
+};
+
+const PHASES = {
+  PHASE_1: 1,
+  PHASE_2: 2,
+  PHASE_3: 3
+};
+
+import { GameHelpers } from '../../utils/Helpers.js';
+
+// 이벤트 기반 상태 관리 시스템
+class GameEventEmitter {
   constructor() {
+    this.events = {};
+  }
+  
+  on(event, callback) {
+    if (!this.events[event]) {
+      this.events[event] = [];
+    }
+    this.events[event].push(callback);
+  }
+  
+  off(event, callback) {
+    if (!this.events[event]) return;
+    this.events[event] = this.events[event].filter(cb => cb !== callback);
+  }
+  
+  emit(event, data) {
+    if (!this.events[event]) return;
+    this.events[event].forEach(callback => callback(data));
+  }
+}
+
+export class GameStateManager extends GameEventEmitter {
+  constructor() {
+    super();
     this.reset();
   }
   
@@ -22,6 +72,9 @@ class GameStateManager {
       lastAttackTime: 0,
       attackCooldown: GAME_CONSTANTS.ATTACK.PHASE_1_COOLDOWN.MIN
     };
+    
+    // 상태 초기화 이벤트 발생
+    this.emit('stateReset', this.state);
   }
   
   // 게임 상태 가져오기
@@ -33,28 +86,59 @@ class GameStateManager {
   damagePlayer() {
     this.state.playerHealth = Math.max(0, this.state.playerHealth - 1);
     this.state.currentCombo = 0;
+    
+    // 플레이어 피격 이벤트 발생
+    this.emit('playerDamaged', {
+      health: this.state.playerHealth,
+      combo: this.state.currentCombo
+    });
+    
     return this.state.playerHealth;
   }
   
   healPlayer() {
     this.state.playerHealth = Math.min(GAME_CONSTANTS.PLAYER.HEALTH, this.state.playerHealth + 1);
+    
+    // 플레이어 회복 이벤트 발생
+    this.emit('playerHealed', {
+      health: this.state.playerHealth
+    });
+    
     return this.state.playerHealth;
   }
   
   // 왕 체력 관리
   damageKing(damage) {
     this.state.kingHealth = Math.max(0, this.state.kingHealth - damage);
+    
+    // 왕 피격 이벤트 발생
+    this.emit('kingDamaged', {
+      health: this.state.kingHealth,
+      damage: damage
+    });
+    
     return this.state.kingHealth;
   }
   
   // 콤보 관리
   addCombo() {
     this.state.currentCombo++;
+    
+    // 콤보 증가 이벤트 발생
+    this.emit('comboIncreased', {
+      combo: this.state.currentCombo
+    });
+    
     return this.state.currentCombo;
   }
   
   resetCombo() {
     this.state.currentCombo = 0;
+    
+    // 콤보 리셋 이벤트 발생
+    this.emit('comboReset', {
+      combo: this.state.currentCombo
+    });
   }
   
   // 페이즈 관리
@@ -135,7 +219,4 @@ class GameStateManager {
     this.state.lastAttackTime = currentTime;
     this.updateAttackCooldown();
   }
-}
-
-// 전역 변수로 노출
-window.GameStateManager = GameStateManager; 
+} 

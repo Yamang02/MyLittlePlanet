@@ -1,20 +1,22 @@
-markdownExploder: true
-prd:
-  prdFile: docs/prd.md
-  prdVersion: v4
-  prdSharded: true
-  prdShardedLocation: docs/prd
-  epicFilePattern: epic-{n}*.md
-architecture:
-  architectureFile: docs/architecture.md
-  architectureVersion: v4
-  architectureSharded: true
-  architectureShardedLocation: docs/architecture
-customTechnicalDocuments: null
+# BMAD Core Configuration
+# This file contains core settings that apply to all agents
+
+# Development Standards
+developmentStandards:
+  es6Modules:
+    mandatory: true
+    rules:
+      - "ALL JavaScript files MUST use ES6 module syntax (export/import)"
+      - "ALL classes MUST have 'export' keyword"
+      - "ALL dependencies MUST use 'import' with .js extension"
+      - "NEVER use global window objects for class definitions"
+      - "ALWAYS include .js extension in import paths"
+      - "HTML scripts MUST have type='module' attribute"
+
+# Agent Load Always Files
 devLoadAlwaysFiles:
-  - docs/architecture/coding-standards.md
-  - docs/architecture/tech-stack.md
-  - docs/architecture/source-tree.md
-devDebugLog: .ai/debug-log.md
-devStoryLocation: docs/stories
-slashPrefix: BMad
+  - "PROJECT_STANDARDS.md"
+  - ".bmad-core/core-config.yaml"
+
+# Project Standards Reference
+projectStandardsFile: "PROJECT_STANDARDS.md"
