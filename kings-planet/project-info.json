@@ -1,0 +1,16 @@
+{
+  "id": "proj-006",
+  "title": "Kings Planet - 2D Phaser.js 게임",
+  "description": "Phaser.js를 활용한 2D 액션 게임으로, 어린왕자가 말풍선을 패링하여 왕을 물리치는 게임입니다. 패링, 회피, 콤보 시스템을 통해 전략적인 전투를 즐길 수 있으며, 페이즈별로 난이도가 증가하는 구조입니다.",
+  "technologies": ["JavaScript", "Phaser.js", "HTML5", "CSS3", "Node.js", "Express.js", "GitHub Pages", "Cursor"],
+  "githubUrl": "https://github.com/YourUsername/MyLittlePlanet",
+  "liveUrl": "https://yourusername.github.io/MyLittlePlanet/kings-planet/",
+  "imageUrl": "https://res.cloudinary.com/dw57ytzhg/image/upload/v1753316994/kings-planet-screenshot.png",
+  "readme": "## Kings Planet - 2D Phaser.js 게임\n\n### 게임 소개\n어린왕자가 말풍선을 패링하여 왕을 물리치는 2D 액션 게임입니다.\n\n### 주요 기능\n- **패링 시스템**: Z키로 말풍선을 패링하여 왕에게 반사\n- **회피 시스템**: X키로 회피하여 공격을 피함\n- **콤보 시스템**: 연속 패링으로 콤보 증가\n- **페이즈 시스템**: 왕의 체력에 따라 난이도 증가\n- **물리 엔진**: Phaser.js 물리 시스템을 활용한 정확한 충돌 처리\n\n### 조작법\n- **방향키**: 좌우 이동\n- **스페이스바**: 점프\n- **X키**: 회피 (쿨다운 1초)\n- **Z키**: 패링\n\n### 기술 스택\n- **Frontend**: JavaScript, Phaser.js, HTML5, CSS3\n- **Backend**: Node.js, Express.js\n- **배포**: GitHub Pages\n- **개발 도구**: Cursor\n\n### 게임 구조\n```\nMyLittlePlanet/\n├── kings-planet/\n│   ├── js/\n│   │   ├── game/\n│   │   │   ├── entities/     # 게임 엔티티 (King, Player, SpeechBubble)\n│   │   │   ├── managers/     # 게임 상태 관리\n│   │   │   └── systems/      # 게임 시스템 (Input, Physics)\n│   │   ├── scenes/          # 게임 씬들\n│   │   ├── managers/        # 대화 관리\n│   │   └── utils/           # 유틸리티\n│   ├── data/\n│   │   └── dialogues/       # 대화 데이터\n│   └── index.html\n└── docs/                    # 프로젝트 문서\n```",
+  "type": "project",
+  "source": "github",
+  "startDate": "2025-01",
+  "endDate": "2025-01",
+  "isTeam": false,
+  "externalUrl": "https://enchanting-caravan-a18.notion.site/Kings-Planet-23750f33f34c80b9bde3e44f91709e6f"
+} 

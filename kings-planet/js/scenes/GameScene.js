@@ -589,9 +589,37 @@ export default class GameScene extends Phaser.Scene {
       this.player.setTint(0x3498db);
     });
 
-    // 말풍선 제거
-    if (bubble.speechText) bubble.speechText.destroy();
-    bubble.destroy();
+    // 말풍선을 왕에게 반사
+    this.reflectBubbleToKing(bubble);
+  }
+
+  reflectBubbleToKing(bubble) {
+    // 말풍선을 왕의 공격 그룹에서 플레이어 공격 그룹으로 이동
+    this.kingAttacks.remove(bubble);
+    this.playerAttacks.add(bubble);
+
+    // 말풍선 색상 변경 (패링된 표시)
+    bubble.setTint(0x00ff00);
+    
+    // 패링된 말풍선에서는 텍스트 제거
+    if (bubble.speechText) {
+      bubble.speechText.destroy();
+      bubble.speechText = null;
+    }
+
+    // 왕을 향해 이동하도록 설정
+    const angleToKing = Phaser.Math.Angle.Between(
+      bubble.x, bubble.y, this.king.x, this.king.y
+    );
+    
+    const speed = 400; // 빠른 속도로 왕에게 날아감
+    bubble.setVelocity(
+      Math.cos(angleToKing) * speed,
+      Math.sin(angleToKing) * speed
+    );
+
+    // 패링된 말풍선 표시
+    bubble.isReflected = true;
   }
 
   // 왕이 플레이어 공격에 피격당했을 때
@@ -623,7 +651,10 @@ export default class GameScene extends Phaser.Scene {
       this.updateKingColor();
     });
 
-    // 플레이어 공격 말풍선 제거
+    // 패링된 말풍선 제거 (텍스트는 이미 제거됨)
+    if (parryBubble.speechText) {
+      parryBubble.speechText.destroy();
+    }
     parryBubble.destroy();
   }
 
@@ -779,12 +810,13 @@ export default class GameScene extends Phaser.Scene {
 
     // 플레이어 패링 공격 업데이트
     this.playerAttacks.children.entries.forEach(bubble => {
-      // 왕을 향해 직접 이동
-      const deltaX = (this.king.x - bubble.x) * 0.05;
-      const deltaY = (this.king.y - bubble.y) * 0.05;
-
-      bubble.x += deltaX;
-      bubble.y += deltaY;
+      // 화면 밖으로 나가면 말풍선 제거
+      if (bubble.x < -100 || bubble.x > this.cameras.main.width + 100 ||
+          bubble.y < -100 || bubble.y > this.cameras.main.height + 100) {
+        if (bubble.speechText) bubble.speechText.destroy();
+        bubble.destroy();
+        return;
+      }
     });
   }
 
